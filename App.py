@@ -1,24 +1,4 @@
-from flask import Flask, render_template, request
-import numpy as np
-from tensorflow import keras
-import cv2
-import matplotlib.pyplot as plt
 import os
-
-
-from flask import Flask, render_template, request
-
-app = Flask(__name__)
-
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html')
-
-@app.route('/plot_image')
-def plot_image():
-    return send_file('static/plot_image.png', mimetype='image/png')
-
-
 from flask import Flask, render_template, request, send_file
 from tensorflow import keras
 import cv2
@@ -26,10 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')  # Use the Agg backend to avoid GUI-related issues
+app = Flask(__name__)
 
 
-
-# Function to estimate ellipse length
 def estimate_ellipse_length(major_axis, minor_axis):
     a = max(major_axis, minor_axis)
     b = min(major_axis, minor_axis)
@@ -54,9 +33,6 @@ def draw_ellipse(image, mask):
             minor_axis = ellipse[1][1]
             estimated_length = estimate_ellipse_length(major_axis, minor_axis)
 
-
-
-
     return modified_image, major_axis, minor_axis, estimated_length
 
 # Function to preprocess the predicted mask
@@ -64,41 +40,20 @@ def preprocess_mask(predicted_mask, threshold_value):
     _, binary_mask = cv2.threshold(predicted_mask, threshold_value, 255, cv2.THRESH_BINARY)
     return binary_mask
 
-# Function to save plot as image
-def save_plot_as_image_ac(image_with_ellipse, binary_mask):
-    # Increase the size of the entire figure
-    plt.figure(figsize=(12, 6))
-
-    # Original Image with Ellipse
-    plt.subplot(1, 2, 1)
-    plt.imshow(cv2.cvtColor(image_with_ellipse, cv2.COLOR_BGR2RGB))
-    plt.axis('off')
-    plt.title("Image with Ellipse")
-
-    # Predicted Mask
-    plt.subplot(1, 2, 2)
-    plt.imshow(binary_mask, cmap='gray')
-    plt.axis('off')
-    plt.title("Predicted Mask")
-
-    # Save the plot as an image
-    plot_image_path = 'static/plot_image.png'
-    plt.savefig(plot_image_path)
-    plt.close()
-
-    return plot_image_path
-
-
-
 # Function to predict mask using the loaded model
 def predict_mask(image, model_path):
     model = keras.models.load_model(model_path)
     predicted_mask = model.predict(image)
     return predicted_mask
 
-# @app.route('/', methods=['GET'])
-# def index():
-#     return render_template('index.html')
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+@app.route('/plot_image')
+def plot_image():
+    return send_file('static/plot_image.png', mimetype='image/png')
 
 @app.route('/ac', methods=['POST'])
 def test_ac():
@@ -145,79 +100,22 @@ def test_ac():
         return render_template('result.html', error='Model prediction failed')
 
 
-# @app.route('/plot_image')
-# def plot_image():
-#     return send_file('static/plot_image.png', mimetype='image/png')
-
-
-
-
-
-
-from flask import Flask, render_template, request, send_file
-from tensorflow import keras
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')  # Use the Agg backend to avoid GUI-related issues
-
-
-
-# Function to estimate ellipse length
-def estimate_ellipse_length(major_axis, minor_axis):
-    a = max(major_axis, minor_axis)
-    b = min(major_axis, minor_axis)
-    h = ((a - b) ** 2) / ((a + b) ** 2)
-    perimeter = np.pi * (a + b) * (1 + (3 * h) / (10 + np.sqrt(4 - 3 * h)))
-    return perimeter
-
-# Function to draw ellipse on the image
-def draw_ellipse(image, mask):
-    modified_image = image.copy()
-
-    # Find contours in the binary mask
-    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Calculate and draw ellipse on the image
-    for contour in contours:
-        if len(contour) >= 5:
-            ellipse = cv2.fitEllipse(contour)
-            cv2.ellipse(modified_image, ellipse, (255, 255, 255), 3)  # Draw ellipse in white
-
-            major_axis = ellipse[1][0]
-            minor_axis = ellipse[1][1]
-            estimated_length = estimate_ellipse_length(major_axis, minor_axis)
-
-    return modified_image, major_axis, minor_axis, estimated_length
-
-# Function to preprocess the predicted mask
-def preprocess_mask(predicted_mask, threshold_value):
-    _, binary_mask = cv2.threshold(predicted_mask, threshold_value, 255, cv2.THRESH_BINARY)
-    return binary_mask
-
-# Function to save plot as image
-def save_plot_as_image(image_with_ellipse, binary_mask, image_with_line):
+# Function to save plot as image AC
+def save_plot_as_image_ac(image_with_ellipse, binary_mask):
     # Increase the size of the entire figure
-    plt.figure(figsize=(24, 8))
+    plt.figure(figsize=(12, 6))
 
     # Original Image with Ellipse
-    plt.subplot(1, 3, 1)
+    plt.subplot(1, 2, 1)
     plt.imshow(cv2.cvtColor(image_with_ellipse, cv2.COLOR_BGR2RGB))
     plt.axis('off')
     plt.title("Image with Ellipse")
 
     # Predicted Mask
-    plt.subplot(1, 3, 2)
+    plt.subplot(1, 2, 2)
     plt.imshow(binary_mask, cmap='gray')
     plt.axis('off')
     plt.title("Predicted Mask")
-
-    # Detected Ellipse with Line
-    plt.subplot(1, 3, 3)
-    plt.imshow(cv2.cvtColor(image_with_line, cv2.COLOR_BGR2RGB))
-    plt.axis('off')
-    plt.title('Detected Ellipse with Line')
 
     # Save the plot as an image
     plot_image_path = 'static/plot_image.png'
@@ -226,15 +124,9 @@ def save_plot_as_image(image_with_ellipse, binary_mask, image_with_line):
 
     return plot_image_path
 
-# Function to predict mask using the loaded model
-def predict_mask(image, model_path):
-    model = keras.models.load_model(model_path)
-    predicted_mask = model.predict(image)
-    return predicted_mask
 
-# @app.route('/', methods=['GET'])
-# def index():
-#     return render_template('index.html')
+
+
 
 @app.route('/bpd', methods=['POST'])
 def test_bpd():
@@ -301,19 +193,46 @@ def test_bpd():
     else:
         return render_template('result.html', error='Model prediction failed')
 
+# Function to save plot as image BPD
+def save_plot_as_image(image_with_ellipse, binary_mask, image_with_line):
+    # Increase the size of the entire figure
+    plt.figure(figsize=(24, 8))
 
+    # Original Image with Ellipse
+    plt.subplot(1, 3, 1)
+    plt.imshow(cv2.cvtColor(image_with_ellipse, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.title("Image with Ellipse")
 
+    # Predicted Mask
+    plt.subplot(1, 3, 2)
+    plt.imshow(binary_mask, cmap='gray')
+    plt.axis('off')
+    plt.title("Predicted Mask")
 
+    # Detected Ellipse with Line
+    plt.subplot(1, 3, 3)
+    plt.imshow(cv2.cvtColor(image_with_line, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.title('Detected Ellipse with Line')
 
+    # Save the plot as an image
+    plot_image_path = 'static/plot_image.png'
+    plt.savefig(plot_image_path)
+    plt.close()
 
+    return plot_image_path
 
-# Add this function to save the plot as an image
+#FEMUR Starts Here!
+
 def save_plot_image(fig, directory, filename):
     file_path = os.path.join(directory, filename)
     fig.savefig(file_path)
     plt.close(fig)  # Close the plot to release resources
     return file_path
 
+
+#Voluson-E6
 
 @app.route('/volusonE6', methods=['POST'])
 def test_voluson_e6():
@@ -397,15 +316,7 @@ def test_voluson_e6():
     return render_template('result_femur.html', error='Invalid file or image processing failed')
 
 
-
-
-def save_plot_image(fig, directory, filename):
-    file_path = os.path.join(directory, filename)
-    fig.savefig(file_path)
-    plt.close(fig)  # Close the plot to release resources
-    return file_path
-
-
+#Voluson-S10
 @app.route('/volusonS10', methods=['POST'])
 def test_voluson_S10():
     # Check if 'file' exists in request.files
@@ -492,12 +403,8 @@ def test_voluson_S10():
     return render_template('result_femur.html', error='Invalid file or image processing failed')
 
 
-def save_plot_image(fig, directory, filename):
-    file_path = os.path.join(directory, filename)
-    fig.savefig(file_path)
-    plt.close(fig)  # Close the plot to release resources
-    return file_path
 
+#Voluson-S8
 
 @app.route('/volusonS8', methods=['POST'])
 def test_voluson_s8():
@@ -584,12 +491,8 @@ def test_voluson_s8():
     # If no valid file or image processing fails, return an error
     return render_template('result_femur.html', error='Invalid file or image processing failed')
 
-def save_plot_image(fig, directory, filename):
-    file_path = os.path.join(directory, filename)
-    fig.savefig(file_path)
-    plt.close(fig)  # Close the plot to release resources
-    return file_path
 
+#ALOKA
 
 @app.route('/aloka', methods=['POST'])
 def test_aloka():
