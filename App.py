@@ -1,12 +1,17 @@
 import os
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 from tensorflow import keras
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from flask import Flask
+from flask_cors import CORS
 matplotlib.use('Agg')  # Use the Agg backend to avoid GUI-related issues
 app = Flask(__name__)
+CORS(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 
 
 def estimate_ellipse_length(major_axis, minor_axis):
@@ -55,14 +60,21 @@ def index():
 def plot_image():
     return send_file('static/plot_image.png', mimetype='image/png')
 
+
 @app.route('/ac', methods=['POST'])
 def test_ac():
+    print('Received a request for AC prediction')  # Print a message when a request is received
+
     if 'file' not in request.files:
+        print('No file provided')
         return render_template('result.html', error='No file provided')
 
     uploaded_file = request.files['file']
     if uploaded_file.filename == '':
+        print('No selected file')
         return render_template('result.html', error='No selected file')
+
+    print('File received:', uploaded_file.filename)
 
     # Read the image
     image_stream = uploaded_file.read()
@@ -77,9 +89,11 @@ def test_ac():
     test_image = np.expand_dims(test_image, axis=0)
 
     model_path = 'C:/Users/alyan/PycharmProjects/FYP-FINAL/models/AC_MODEL.h5'
+    print('Using model:', model_path)
 
     # Predict the mask
     predicted_mask = predict_mask(test_image, model_path)
+    print('Prediction done')
 
     # Check if the predicted_mask is not None before proceeding
     if predicted_mask is not None:
@@ -88,20 +102,28 @@ def test_ac():
 
         # Draw ellipse on the image and get measurements
         image_with_ellipse, major_axis, minor_axis, estimated_length = draw_ellipse(test_image_for_display, binary_mask)
+        print('Ellipse drawn')
 
         # Save the plot as an image
-        plot_image_path = save_plot_as_image_ac(image_with_ellipse, binary_mask)
+        plot_image_path = save_plot_as_image_AC(image_with_ellipse, binary_mask)
+        print('Plot image saved')
 
-
-        # Render result.html with plot and measurements
-        return render_template('result.html', plot_image_path=plot_image_path, major_axis=major_axis, minor_axis=minor_axis, estimated_length=estimated_length)
+        # Return the data in JSON format
+        return jsonify({
+            'plot_image_path': plot_image_path,
+            'image_path': 'static/plot_images/AC_plot.png',
+            'major_axis': major_axis,
+            'minor_axis': minor_axis,
+            'estimated_length': estimated_length
+        })
 
     else:
+        print('Model prediction failed')
         return render_template('result.html', error='Model prediction failed')
 
 
 # Function to save plot as image AC
-def save_plot_as_image_ac(image_with_ellipse, binary_mask):
+def save_plot_as_image_AC(image_with_ellipse, binary_mask):
     # Increase the size of the entire figure
     plt.figure(figsize=(12, 6))
 
@@ -118,11 +140,12 @@ def save_plot_as_image_ac(image_with_ellipse, binary_mask):
     plt.title("Predicted Mask")
 
     # Save the plot as an image
-    plot_image_path = 'static/plot_image.png'
-    plt.savefig(plot_image_path)
+    plot_image_pathh = 'static/plot_images/AC_plot.png'
+    plt.savefig(plot_image_pathh)
     plt.close()
 
-    return plot_image_path
+    return plot_image_pathh
+
 
 
 
@@ -185,16 +208,16 @@ def test_bpd():
 
 
         # Save the plot as an image
-        plot_image_path = save_plot_as_image(image_with_ellipse, binary_mask, image_with_line)
+        plot_image_path = save_plot_as_image_BPD(image_with_ellipse, binary_mask, image_with_line)
 
         # Render result.html with plot and measurements
-        return render_template('result.html', plot_image_path=plot_image_path, major_axis=major_axis, minor_axis=minor_axis, estimated_length=estimated_length, length = length )
+        return render_template('result.html', plot_image_path=plot_image_path,image_path='static/plot_images/BPD_plot.png', major_axis=major_axis, minor_axis=minor_axis, estimated_length=estimated_length, length = length )
 
     else:
         return render_template('result.html', error='Model prediction failed')
 
 # Function to save plot as image BPD
-def save_plot_as_image(image_with_ellipse, binary_mask, image_with_line):
+def save_plot_as_image_BPD(image_with_ellipse, binary_mask, image_with_line):
     # Increase the size of the entire figure
     plt.figure(figsize=(24, 8))
 
@@ -217,7 +240,7 @@ def save_plot_as_image(image_with_ellipse, binary_mask, image_with_line):
     plt.title('Detected Ellipse with Line')
 
     # Save the plot as an image
-    plot_image_path = 'static/plot_image.png'
+    plot_image_path = 'static/plot_images/BPD_plot.png'
     plt.savefig(plot_image_path)
     plt.close()
 
@@ -225,6 +248,7 @@ def save_plot_as_image(image_with_ellipse, binary_mask, image_with_line):
 
 #FEMUR Starts Here!
 
+# save plot as image (ALL-FEMUR)
 def save_plot_image(fig, directory, filename):
     file_path = os.path.join(directory, filename)
     fig.savefig(file_path)
