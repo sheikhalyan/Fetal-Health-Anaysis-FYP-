@@ -118,8 +118,11 @@ def test_ac():
         })
 
     else:
-        print('Model prediction failed')
-        return render_template('result.html', error='Model prediction failed')
+        #print('Model prediction failed')
+        #return render_template('result.html', error='Model prediction failed')
+        return jsonify({
+            'error' : 'Model prediction failed'
+        })
 
 
 # Function to save plot as image AC
@@ -211,7 +214,14 @@ def test_bpd():
         plot_image_path = save_plot_as_image_BPD(image_with_ellipse, binary_mask, image_with_line)
 
         # Render result.html with plot and measurements
-        return render_template('result.html', plot_image_path=plot_image_path,image_path='static/plot_images/BPD_plot.png', major_axis=major_axis, minor_axis=minor_axis, estimated_length=estimated_length, length = length )
+        return jsonify({
+            'plot_image_path': plot_image_path,
+            'image_path': 'static/plot_images/BPD_plot.png',
+            'major_axis': major_axis,
+            'minor_axis': minor_axis,
+            'estimated_length': estimated_length,
+            'length': length
+        })
 
     else:
         return render_template('result.html', error='Model prediction failed')
@@ -334,7 +344,13 @@ def test_voluson_e6():
                     plot_image_path = save_plot_image(fig, 'static/plot_images', 'voluson_e6_plot.png')
 
                     # Render the result page with the specific details
-                    return render_template('result_femur.html', machine='test_volusonE6', femur_length=pix_mm, image_path='static/plot_images/voluson_e6_plot.png', plot_path=plot_image_path)
+
+                    return jsonify({
+                        'machine': 'test_volusonE6',
+                        'femur_length': pix_mm,
+                        'image_path': 'static/plot_images/voluson_e6_plot.png',
+                        'plot_path': plot_image_path
+                    })
 
     # If no valid file or image processing fails, return an error
     return render_template('result_femur.html', error='Invalid file or image processing failed')
@@ -419,8 +435,12 @@ def test_voluson_S10():
                     # Render the result page with the specific details
                     # Inside the test_voluson_s10 route
                     machine_name = request.args.get('machine', default='test_volusonS10')
-                    return render_template('result_femur.html', machine=machine_name, femur_length=pix_mm,image_path='static/plot_images/voluson_s10_plot.png',plot_path=plot_image_path)
-
+                    return jsonify({
+                        'machine': machine_name,
+                        'femur_length': pix_mm,
+                        'image_path': 'static/plot_images/voluson_s10_plot.png',
+                        'plot_path': plot_image_path
+                    })
 
 
     # If no valid file or image processing fails, return an error
@@ -508,8 +528,12 @@ def test_voluson_s8():
                     # Render the result page with the specific details
                     # Inside the test_voluson_s8 route
                     machine_name = request.args.get('machine', default='test_volusonS8')
-                    return render_template('result_femur.html', machine=machine_name, femur_length=pix_mm,image_path='static/plot_images/voluson_s8_plot.png',plot_path=plot_image_path)
-
+                    return jsonify({
+                        'machine': machine_name,
+                        'femur_length': pix_mm,
+                        'image_path': 'static/plot_images/voluson_s8_plot.png',
+                        'plot_path': plot_image_path
+                    })
 
 
     # If no valid file or image processing fails, return an error
@@ -596,8 +620,12 @@ def test_aloka():
                     # Render the result page with the specific details
 
                     machine_name = request.args.get('machine', default='test_aloka')
-                    return render_template('result_femur.html', machine=machine_name, femur_length=pix_mm,image_path='static/plot_images/aloka_plot.png',plot_path=plot_image_path)
-
+                    return jsonify({
+                        'machine': machine_name,
+                        'femur_length': pix_mm,
+                        'image_path': 'static/plot_images/aloka_plot.png',
+                        'plot_path': plot_image_path
+                    })
 
 
     # If no valid file or image processing fails, return an error
