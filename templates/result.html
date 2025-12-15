@@ -41,14 +41,14 @@
     <h1>Fetal Health Analysis Result</h1>
 
     <div class="result-container">
-        <h2>Abdominal Circumference (AC) Measurement</h2>
+        <h2>{{ measurement_name }} Measurement</h2>
         <p>Major Axis: {{ major_axis }} mm</p>
         <p>Minor Axis: {{ minor_axis }} mm</p>
         <p>Estimated Length: {{ estimated_length }} mm</p>
-        <p>Length of Line: {{length }} mm</p>
+        {% if length %}<p>Length of Line: {{ length }} mm</p>{% endif %}
 
-        {% if plot_image_path %}
-            <img src="{{ url_for('plot_image') }}" alt="AC Measurement" class="result-image">
+        {% if plot_image_path and plot_route %}
+            <img src="{{ url_for(plot_route) }}" alt="{{ measurement_name }} Measurement" class="result-image">
         {% endif %}
     </div>
 </body>
