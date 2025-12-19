@@ -59,17 +59,26 @@ def predict_mask_tflite(image):
 
 
 def save_plot_as_image_ac(image_with_ellipse, binary_mask):
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(30, 10))
+
+    # REMOVE extra white space
+    plt.subplots_adjust(
+        left=0.01,
+        right=0.99,
+        top=0.99,
+        bottom=0.01,
+        wspace=0.05
+    )
 
     plt.subplot(1, 2, 1)
     plt.imshow(cv2.cvtColor(image_with_ellipse, cv2.COLOR_BGR2RGB))
     plt.axis("off")
-    plt.title("Image with Ellipse")
+    plt.title("Image with Ellipse", fontsize=25, pad=15)
 
     plt.subplot(1, 2, 2)
     plt.imshow(binary_mask, cmap="gray")
     plt.axis("off")
-    plt.title("Predicted Mask")
+    plt.title("Predicted Mask", fontsize=25, pad=15)
 
     plt.savefig(PLOT_IMAGE_PATH)
     plt.close()
@@ -124,6 +133,12 @@ def test_ac():
         display_image, binary_mask
     )
 
+    # Round values to 2 decimal places
+    major_axis = round(major_axis, 2)
+    minor_axis = round(minor_axis, 2)
+    estimated_length = round(estimated_length, 2)
+
+
     plot_path_ac = save_plot_as_image_ac(image_with_ellipse, binary_mask)
 
     return render_template(
@@ -160,30 +175,40 @@ def predict_mask_bpd(image):
 
 
 def save_plot_as_image_bpd(image_with_ellipse, binary_mask, image_with_line):
-    plt.figure(figsize=(24, 8))
+    plt.figure(figsize=(30, 10))
+
+    # REMOVE extra white space
+    plt.subplots_adjust(
+        left=0.01,
+        right=0.99,
+        top=0.99,
+        bottom=0.01,
+        wspace=0.05
+    )
 
     # Original Image with Ellipse
     plt.subplot(1, 3, 1)
     plt.imshow(cv2.cvtColor(image_with_ellipse, cv2.COLOR_BGR2RGB))
     plt.axis('off')
-    plt.title("Image with Ellipse")
+    plt.title("Image with Ellipse", fontsize=25, pad=15)
 
     # Predicted Mask
     plt.subplot(1, 3, 2)
     plt.imshow(binary_mask, cmap='gray')
     plt.axis('off')
-    plt.title("Predicted Mask")
+    plt.title("Predicted Mask", fontsize=25, pad=15)
 
     # Detected Ellipse with Line
     plt.subplot(1, 3, 3)
     plt.imshow(cv2.cvtColor(image_with_line, cv2.COLOR_BGR2RGB))
     plt.axis('off')
-    plt.title('Detected Ellipse with Line')
+    plt.title('Detected Ellipse with Line', fontsize=25, pad=15)
 
     plt.savefig(BPD_PLOT_IMAGE_PATH)
     plt.close()
 
     return BPD_PLOT_IMAGE_PATH
+
 
 
 @app.route("/bpd_plot_image")
@@ -238,6 +263,12 @@ def test_bpd():
             bottom_point = (center_x, center_y + major_axis_px // 2)
             cv2.line(image_with_line, top_point, bottom_point, (255, 0, 0), 2)
             length = np.sqrt((bottom_point[0] - top_point[0])**2 + (bottom_point[1] - top_point[1])**2) * 0.3169
+
+    # Round values to 2 decimal places
+    major_axis = round(major_axis, 2)
+    minor_axis = round(minor_axis, 2)
+    estimated_length = round(estimated_length, 2)
+    length = round(length,2)
 
     # Save plot image
     plot_path_bpd = save_plot_as_image_bpd(image_with_ellipse, binary_mask, image_with_line)
@@ -320,21 +351,43 @@ def test_voluson_e6_tflite():
 
     pix_mm = contour_length * 0.08458333  # Pixel to mm conversion
 
+    # Round the femur length to 2 decimal places
+    pix_mm = round(pix_mm, 2)
+
     # Create images for plotting
     segmented_femur = cv2.bitwise_and(display_image, display_image, mask=binary_mask)
     contour_image = np.zeros_like(segmented_femur)
     cv2.drawContours(contour_image, contours, -1, (255, 0, 0), 1)
 
-    # Plot all 3 images + length
-    fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+    # Plot all 3 images
+    # Create figure and axes
+    fig, axs = plt.subplots(1, 3, figsize=(30, 10))
+
+    # REMOVE extra white space
+    plt.subplots_adjust(
+        left=0.01,
+        right=0.99,
+        top=0.99,
+        bottom=0.01,
+        wspace=0.05
+    )
+
+    # Plot images
     axs[0].imshow(display_image, cmap='gray')
-    axs[0].set_title('Original Image'); axs[0].axis('off')
+    axs[0].set_title('Original Image',fontsize = 25,pad = 15)
+    axs[0].axis('off')
+
     axs[1].imshow(segmented_femur, cmap='gray')
-    axs[1].set_title('Segmented Femur'); axs[1].axis('off')
+    axs[1].set_title('Segmented Femur',fontsize = 25,pad = 15)
+    axs[1].axis('off')
+
     axs[2].imshow(contour_image, cmap='gray')
-    axs[2].set_title('Contour Area'); axs[2].axis('off')
-    axs[3].text(0.5, 0.5, f'Length: {pix_mm:.2f} mm', ha='center', va='center', fontsize=12)
-    axs[3].axis('off')
+    axs[2].set_title('Contour Area',fontsize = 25,pad = 15)
+    axs[2].axis('off')
+
+    #code commented for length in 4th column of plot
+   # axs[3].text(0.5, 0.5, f'Length: {pix_mm:.2f} mm', ha='center', va='center', fontsize=12)
+    #axs[3].axis('off')
 
     # Save plot
     plot_image_path = save_plot_image(fig, FEMUR_PLOT_DIR, 'voluson_e6_plot.png')
@@ -403,21 +456,42 @@ def test_voluson_s10_tflite():
 
     pix_mm = contour_length * 0.08458333  # Pixel to mm conversion
 
+    # Round the femur length to 2 decimal places
+    pix_mm = round(pix_mm, 2)
+
     # Create images for plotting
     segmented_femur = cv2.bitwise_and(display_image, display_image, mask=binary_mask)
     contour_image = np.zeros_like(segmented_femur)
     cv2.drawContours(contour_image, contours, -1, (255, 0, 0), 1)
 
-    # Plot all 3 images + length
-    fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+    # Plot all 3 images
+    fig, axs = plt.subplots(1, 3, figsize=(30, 10))
+
+    # REMOVE extra white space
+    plt.subplots_adjust(
+        left=0.01,
+        right=0.99,
+        top=0.99,
+        bottom=0.01,
+        wspace=0.05
+    )
+
     axs[0].imshow(display_image, cmap='gray')
-    axs[0].set_title('Original Image'); axs[0].axis('off')
+    axs[0].set_title('Original Image', fontsize=25, pad=15)
+    axs[0].axis('off')
+
     axs[1].imshow(segmented_femur, cmap='gray')
-    axs[1].set_title('Segmented Femur'); axs[1].axis('off')
+    axs[1].set_title('Segmented Femur', fontsize=25, pad=15)
+    axs[1].axis('off')
+
     axs[2].imshow(contour_image, cmap='gray')
-    axs[2].set_title('Contour Area'); axs[2].axis('off')
-    axs[3].text(0.5, 0.5, f'Length: {pix_mm:.2f} mm', ha='center', va='center', fontsize=12)
-    axs[3].axis('off')
+    axs[2].set_title('Contour Area', fontsize=25, pad=15)
+    axs[2].axis('off')
+
+    # code commented for length in 4th column of plot
+    #axs[3].text(0.5, 0.5, f'Length: {pix_mm:.2f} mm', ha='center', va='center', fontsize=12)
+    #axs[3].axis('off')
+
 
     # Save plot
     plot_image_path = save_plot_image(fig, FEMUR_PLOT_DIR, 'voluson_s10_plot.png')
@@ -430,8 +504,6 @@ def test_voluson_s10_tflite():
         image_path=os.path.join(FEMUR_PLOT_DIR, 'voluson_s10_plot.png'),
         plot_path=plot_image_path
     )
-
-
 
 
 # --------------------------------------------------
@@ -494,6 +566,9 @@ def test_voluson_s8_tflite():
     # Pixel → mm conversion
     pix_mm = contour_length * 0.08458333
 
+    # Round the femur length to 2 decimal places
+    pix_mm = round(pix_mm, 2)
+
     # Visualization
     segmented_femur = cv2.bitwise_and(
         display_image, display_image, mask=binary_mask
@@ -502,23 +577,33 @@ def test_voluson_s8_tflite():
     contour_image = np.zeros_like(segmented_femur)
     cv2.drawContours(contour_image, contours, -1, (255, 0, 0), 1)
 
-    # Plot results
-    fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+    # Plot all 3 images
+    fig, axs = plt.subplots(1, 3, figsize=(30, 10))
+
+    # REMOVE extra white space
+    plt.subplots_adjust(
+        left=0.01,
+        right=0.99,
+        top=0.99,
+        bottom=0.01,
+        wspace=0.05
+    )
 
     axs[0].imshow(display_image, cmap='gray')
-    axs[0].set_title('Original Image'); axs[0].axis('off')
+    axs[0].set_title('Original Image', fontsize=25, pad=15)
+    axs[0].axis('off')
 
     axs[1].imshow(segmented_femur, cmap='gray')
-    axs[1].set_title('Segmented Femur'); axs[1].axis('off')
+    axs[1].set_title('Segmented Femur', fontsize=25, pad=15)
+    axs[1].axis('off')
 
     axs[2].imshow(contour_image, cmap='gray')
-    axs[2].set_title('Contour Area'); axs[2].axis('off')
+    axs[2].set_title('Contour Area', fontsize=25, pad=15)
+    axs[2].axis('off')
 
-    axs[3].text(
-        0.5, 0.5, f'Length: {pix_mm:.2f} mm',
-        ha='center', va='center', fontsize=12
-    )
-    axs[3].axis('off')
+    # code commented for length in 4th column of plot
+    # axs[3].text(0.5, 0.5, f'Length: {pix_mm:.2f} mm', ha='center', va='center', fontsize=12)
+    # axs[3].axis('off')
 
     # Save plot
     plot_image_path = save_plot_image(
@@ -528,7 +613,7 @@ def test_voluson_s8_tflite():
     # Render result
     return render_template(
         'result_femur.html',
-        machine='Voluson S8',
+        machine='VolusonS8',
         femur_length=pix_mm,
         image_path=f'{FEMUR_PLOT_DIR}/voluson_s8_plot.png',
         plot_path=plot_image_path
@@ -596,6 +681,9 @@ def test_aloka_tflite():
     # Pixel → mm conversion (ALOKA specific)
     pix_mm = contour_length * 0.06858333
 
+    # Round the femur length to 2 decimal places
+    pix_mm = round(pix_mm, 2)
+
     # Visualization
     segmented_femur = cv2.bitwise_and(
         display_image, display_image, mask=binary_mask
@@ -605,22 +693,33 @@ def test_aloka_tflite():
     cv2.drawContours(contour_image, contours, -1, (255, 0, 0), 1)
 
     # Plot results
-    fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+    # Plot all 3 images
+    fig, axs = plt.subplots(1, 3, figsize=(30, 10))
+
+    # REMOVE extra white space
+    plt.subplots_adjust(
+        left=0.01,
+        right=0.99,
+        top=0.99,
+        bottom=0.01,
+        wspace=0.05
+    )
 
     axs[0].imshow(display_image, cmap='gray')
-    axs[0].set_title('Original Image'); axs[0].axis('off')
+    axs[0].set_title('Original Image', fontsize=25, pad=15)
+    axs[0].axis('off')
 
     axs[1].imshow(segmented_femur, cmap='gray')
-    axs[1].set_title('Segmented Femur'); axs[1].axis('off')
+    axs[1].set_title('Segmented Femur', fontsize=25, pad=15)
+    axs[1].axis('off')
 
     axs[2].imshow(contour_image, cmap='gray')
-    axs[2].set_title('Contour Area'); axs[2].axis('off')
+    axs[2].set_title('Contour Area', fontsize=25, pad=15)
+    axs[2].axis('off')
 
-    axs[3].text(
-        0.5, 0.5, f'Length: {pix_mm:.2f} mm',
-        ha='center', va='center', fontsize=12
-    )
-    axs[3].axis('off')
+    # code commented for length in 4th column of plot
+    # axs[3].text(0.5, 0.5, f'Length: {pix_mm:.2f} mm', ha='center', va='center', fontsize=12)
+    # axs[3].axis('off')
 
     # Save plot
     plot_image_path = save_plot_image(
@@ -637,10 +736,10 @@ def test_aloka_tflite():
     )
 
 
-@app.route('/Femur.html', methods=['GET', 'POST'])
+@app.route('/femur', methods=['GET', 'POST'])
 def femur_page():
     machine = request.args.get('machine', 'default_machine_value')
-    return render_template('Femur.html', machine=machine)
+    return render_template('femur.html', machine=machine)
 
 
 if __name__ == '__main__':

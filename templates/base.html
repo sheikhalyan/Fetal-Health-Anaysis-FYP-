@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Fetal Health Analysis{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="light-theme" id="bodyTag">
+
+<!-- Page loader -->
+<div id="pageLoader" class="spinner-overlay">
+    <div class="spinner"></div>
+</div>
+
+<header class="app-header">
+    <!-- Simple linear home icon -->
+    <a href="{{ url_for('index') }}" class="home-icon" title="Go to Home">
+        <i class="bi bi-house"></i>
+    </a>
+
+    <div class="header-content">
+        <a href="{{ url_for('index') }}" class="header-link">
+            <h1>Womb Vision</h1>
+        </a>
+        <p class="subtitle">AI-based Ultrasound Measurement System</p>
+    </div>
+
+    <!-- Theme toggle -->
+    <button id="themeToggle" class="theme-toggle-btn">🌙</button>
+</header>
+
+<main class="app-container" id="pageContent">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="app-footer">
+    <p>© {{ 2025 }} | Sheikh Alyan</p>
+</footer>
+
+<!-- Image Lightbox -->
+<div class="image-lightbox" id="imageLightbox">
+    <span class="lightbox-close" id="closeLightbox">&times;</span>
+    <img id="lightboxImage" src="" alt="Zoomed Image">
+</div>
+
+
+<script>
+
+/* ================= THEME TOGGLE ================= */
+const toggleBtn = document.getElementById('themeToggle');
+const body = document.getElementById('bodyTag');
+
+body.classList.remove('light-theme', 'dark-theme');
+body.classList.add('light-theme');
+toggleBtn.textContent = '🌙';
+
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    body.classList.remove('light-theme', 'dark-theme');
+    body.classList.add(savedTheme);
+    toggleBtn.textContent = savedTheme === 'dark-theme' ? '☀️' : '🌙';
+}
+
+toggleBtn.addEventListener('click', () => {
+    if (body.classList.contains('light-theme')) {
+        body.classList.replace('light-theme', 'dark-theme');
+        toggleBtn.textContent = '☀️';
+        localStorage.setItem('theme', 'dark-theme');
+    } else {
+        body.classList.replace('dark-theme', 'light-theme');
+        toggleBtn.textContent = '🌙';
+        localStorage.setItem('theme', 'light-theme');
+    }
+});
+
+/* ================= LIGHTBOX ================= */
+const lightbox = document.getElementById("imageLightbox");
+const lightboxImg = document.getElementById("lightboxImage");
+const closeBtn = document.getElementById("closeLightbox");
+
+/* 🔴 CRITICAL: disable native browser dragging */
+lightboxImg.setAttribute("draggable", false);
+lightboxImg.addEventListener("dragstart", e => e.preventDefault());
+
+let scale = 1;
+let translateX = 0;
+let translateY = 0;
+
+let startX = 0;
+let startY = 0;
+let isDragging = false;
+
+let lastTouchDist = null;
+let lastTouchX = 0;
+let lastTouchY = 0;
+
+/* ---------- OPEN LIGHTBOX ---------- */
+document.querySelectorAll(".result-image").forEach(img => {
+    img.style.cursor = "zoom-in";
+
+    img.addEventListener("click", () => {
+        lightbox.style.display = "flex";
+        lightboxImg.src = img.src;
+
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+
+        lightboxImg.style.transform = "translate(0,0) scale(1)";
+        lightboxImg.style.cursor = "zoom-in";
+
+        document.body.classList.add("no-scroll");
+    });
+});
+
+/* ---------- CLOSE LIGHTBOX ---------- */
+function closeLightbox() {
+    lightbox.style.display = "none";
+
+    scale = 1;
+    translateX = 0;
+    translateY = 0;
+
+    lightboxImg.style.transform = "translate(0,0) scale(1)";
+    lightboxImg.style.cursor = "zoom-in";
+
+    document.body.classList.remove("no-scroll");
+}
+
+closeBtn.addEventListener("click", closeLightbox);
+lightbox.addEventListener("click", e => {
+    if (e.target === lightbox) closeLightbox();
+});
+lightboxImg.addEventListener("click", e => e.stopPropagation());
+
+/* ================= DESKTOP CONTROLS (FIXED) ================= */
+
+// Drag start
+lightboxImg.addEventListener("mousedown", e => {
+    e.preventDefault(); // 🔴 REQUIRED
+    if (e.button !== 0 || scale <= 1) return;
+
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    lightboxImg.style.cursor = "grabbing";
+    lightboxImg.style.transition = "none";
+});
+
+// Drag move (document-level)
+document.addEventListener("mousemove", e => {
+    if (!isDragging || scale <= 1) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    translateX += dx;
+    translateY += dy;
+
+    limitDrag();
+
+    lightboxImg.style.transform =
+        `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+});
+
+// Drag end (always)
+document.addEventListener("mouseup", () => {
+    if (!isDragging) return;
+
+    isDragging = false;
+    lightboxImg.style.cursor = scale > 1 ? "grab" : "zoom-in";
+    lightboxImg.style.transition = "transform 0.2s ease";
+});
+
+// Safety stop
+window.addEventListener("blur", () => {
+    isDragging = false;
+});
+
+/* ---------- WHEEL ZOOM ---------- */
+lightbox.addEventListener("wheel", e => {
+    e.preventDefault();
+
+    const rect = lightboxImg.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    const prevScale = scale;
+    scale += -e.deltaY * 0.001;
+    scale = Math.min(Math.max(1, scale), 3);
+
+    translateX -= (offsetX - rect.width / 2) * (scale / prevScale - 1);
+    translateY -= (offsetY - rect.height / 2) * (scale / prevScale - 1);
+
+    if (scale === 1) {
+        translateX = 0;
+        translateY = 0;
+    }
+
+    limitDrag();
+
+    lightboxImg.style.transform =
+        `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    lightboxImg.style.cursor = scale > 1 ? "grab" : "zoom-in";
+});
+
+/* ---------- DOUBLE CLICK ZOOM ---------- */
+lightboxImg.addEventListener("dblclick", e => {
+    e.stopPropagation();
+
+    if (scale === 1) {
+        scale = 2;
+        lightboxImg.style.cursor = "grab";
+    } else {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+        lightboxImg.style.cursor = "zoom-in";
+    }
+
+    lightboxImg.style.transform =
+        `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+});
+
+/* ================= MOBILE TOUCH (DOUBLE TAP + PINCH + DRAG) ================= */
+
+let lastTap = 0;
+
+lightboxImg.addEventListener("touchstart", e => {
+    const now = Date.now();
+
+    /* ---------- DOUBLE TAP ---------- */
+    if (e.touches.length === 1 && now - lastTap < 300) {
+        e.preventDefault();
+
+        if (scale === 1) {
+            scale = 2;
+        } else {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+        }
+
+        lightboxImg.style.transform =
+            `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+
+        lastTap = 0;
+        return;
+    }
+
+    lastTap = now;
+
+    /* ---------- PINCH SETUP ---------- */
+    if (e.touches.length === 2) {
+        lastTouchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+    }
+    /* ---------- DRAG SETUP ---------- */
+    else if (e.touches.length === 1 && scale > 1) {
+        lastTouchX = e.touches[0].clientX - translateX;
+        lastTouchY = e.touches[0].clientY - translateY;
+    }
+}, { passive: false });
+
+lightboxImg.addEventListener("touchmove", e => {
+    e.preventDefault();
+
+    /* ---------- PINCH ZOOM ---------- */
+    if (e.touches.length === 2 && lastTouchDist !== null) {
+        const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+
+        scale += (dist - lastTouchDist) * 0.008;
+        scale = Math.min(Math.max(1, scale), 3);
+        lastTouchDist = dist;
+
+        if (scale === 1) {
+            translateX = 0;
+            translateY = 0;
+        }
+    }
+    /* ---------- ONE-FINGER DRAG ---------- */
+    else if (e.touches.length === 1 && scale > 1) {
+        translateX = e.touches[0].clientX - lastTouchX;
+        translateY = e.touches[0].clientY - lastTouchY;
+        limitDrag();
+    }
+
+    lightboxImg.style.transform =
+        `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+}, { passive: false });
+
+lightboxImg.addEventListener("touchend", () => {
+    lastTouchDist = null;
+
+    if (scale <= 1) {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+        lightboxImg.style.transform = "translate(0,0) scale(1)";
+    }
+});
+
+
+/* ================= HELPERS ================= */
+function limitDrag() {
+    const parent = lightbox.getBoundingClientRect();
+    const w = lightboxImg.naturalWidth * scale;
+    const h = lightboxImg.naturalHeight * scale;
+
+    const maxX = Math.max((w - parent.width) / 2, 0);
+    const maxY = Math.max((h - parent.height) / 2, 0);
+
+    translateX = Math.min(Math.max(translateX, -maxX), maxX);
+    translateY = Math.min(Math.max(translateY, -maxY), maxY);
+}
+</script>
+
+</body>
+</html>

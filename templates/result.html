@@ -1,55 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fetal Health Analysis Result</title>
-    <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 20px;
-    }
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
 
-    h1 {
-        text-align: center;
-        color: #333;
-    }
+{% block content %}
+<div class="result-page">
+    <div class="card result-card">
+        <h2>{{ measurement_name }} Result</h2>
 
-    .result-container {
-        max-width: 100%;
-        margin: 20px auto;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        box-sizing: border-box; /* Ensures padding and border are included in the width */
-    }
+        <div class="result-details">
+            <p><strong>Major Axis:</strong> {{ major_axis }} mm</p>
+            <p><strong>Minor Axis:</strong> {{ minor_axis }} mm</p>
+            <p><strong>Estimated Length:</strong> {{ estimated_length }} mm</p>
+            {% if length %}
+                <p><strong>Line Length:</strong> {{ length }} mm</p>
+            {% endif %}
+        </div>
 
-    .result-image {
-        max-width: 100%;
-        height: auto;
-        margin-top: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-</style>
-
-</head>
-<body>
-    <h1>Fetal Health Analysis Result</h1>
-
-    <div class="result-container">
-        <h2>{{ measurement_name }} Measurement</h2>
-        <p>Major Axis: {{ major_axis }} mm</p>
-        <p>Minor Axis: {{ minor_axis }} mm</p>
-        <p>Estimated Length: {{ estimated_length }} mm</p>
-        {% if length %}<p>Length of Line: {{ length }} mm</p>{% endif %}
-
-        {% if plot_image_path and plot_route %}
-            <img src="{{ url_for(plot_route) }}" alt="{{ measurement_name }} Measurement" class="result-image">
+        {% if plot_image_path %}
+            <img src="{{ url_for(plot_route) }}" class="result-image" alt="Result Plot">
         {% endif %}
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

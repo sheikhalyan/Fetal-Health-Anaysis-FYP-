@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Femur Length{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Femur Length – {{ machine | upper }}</h2>
+
+    <form id="femurForm" method="POST" action="" enctype="multipart/form-data">
+        <div class="upload-zone" id="femurUploadZone">
+            Drag & Drop file here or click to upload
+            <input type="file" name="file" id="femurFileInput" required hidden>
+            <span id="femurFileName" class="file-name"></span>
+        </div>
+        <button type="submit">Analyze Femur</button>
+    </form>
+</div>
+
+<script>
+const machine = new URLSearchParams(window.location.search).get('machine');
+const routes = {
+    volusone6: "/volusonE6",
+    volusons8: "/volusonS8",
+    volusons10: "/volusonS10",
+    aloka: "/aloka"
+};
+
+// Set form action dynamically based on machine
+const femurForm = document.getElementById("femurForm");
+if (routes[machine]) {
+    femurForm.action = routes[machine] + "?machine=" + machine;
+} else {
+    alert("Unsupported machine selected");
+}
+
+// -------------------- Drag & Drop --------------------
+const uploadZone = document.getElementById("femurUploadZone");
+const fileInput = document.getElementById("femurFileInput");
+const fileNameSpan = document.getElementById("femurFileName");
+
+uploadZone.addEventListener('click', () => fileInput.click());
+
+uploadZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    uploadZone.classList.add('hover');
+});
+
+uploadZone.addEventListener('dragleave', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('hover');
+});
+
+uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('hover');
+    fileInput.files = e.dataTransfer.files;
+    if (fileInput.files.length > 0) {
+        fileNameSpan.textContent = fileInput.files[0].name;
+    }
+});
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        fileNameSpan.textContent = fileInput.files[0].name;
+    }
+});
+
+// -------------------- Show loader on submit --------------------
+femurForm.addEventListener('submit', e => {
+    if (!fileInput.files.length) {
+        e.preventDefault();
+        alert("Please select a file");
+        return;
+    }
+    // Show loader
+    const loader = document.getElementById('pageLoader');
+    loader.style.display = 'flex';
+});
+</script>
+
+
+{% endblock %}
