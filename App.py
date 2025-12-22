@@ -781,12 +781,10 @@ def test_aloka_tflite():
         image_path='static/Femur_result_plot_images/aloka_plot.png'
     )
 
-
 @app.route('/femur', methods=['GET', 'POST'])
 def femur_page():
     machine = request.args.get('machine', 'default_machine_value')
     return render_template('femur.html', machine=machine)
-
 
 if __name__ == '__main__':
     serve(app, host='0.0.0.0', port=5000)  # listen on all interfaces
