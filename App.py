@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from waitress import serve
 
 app = Flask(__name__)
 
@@ -14,9 +15,17 @@ PIXEL_TO_MM = 0.197889
 # --------------------------------------------------
 # Route for Abdominal Circumference (AC)
 # --------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-MODEL_PATH = "D:/Alyan/Final-Year-Project/FYP/FYP-FINAL-Server-webapp/models/AC_MODEL.tflite"
-PLOT_IMAGE_PATH = "static/Ac_Bpd_result_plot_images/ac_plot_image.png"
+MODEL_PATH = os.path.join(BASE_DIR, "models", "AC_MODEL.tflite")
+
+PLOT_IMAGE_PATH = os.path.join(
+    BASE_DIR,
+    "static",
+    "Ac_Bpd_result_plot_images",
+    "ac_plot_image.png"
+)
+
 
 
 interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
@@ -157,8 +166,15 @@ def test_ac():
 # --------------------------------------------------
 
 
-BPD_MODEL_PATH = "D:/Alyan/Final-Year-Project/FYP/FYP-FINAL-Server-webapp/models/BPD_MODEL.tflite"
-BPD_PLOT_IMAGE_PATH = "static/Ac_Bpd_result_plot_images/bpd_plot_image.png"
+BPD_MODEL_PATH = os.path.join(BASE_DIR, "models", "BPD_MODEL.tflite")
+
+BPD_PLOT_IMAGE_PATH = os.path.join(
+    BASE_DIR,
+    "static",
+    "Ac_Bpd_result_plot_images",
+    "bpd_plot_image.png"
+)
+
 
 
 bpd_interpreter = tf.lite.Interpreter(model_path=BPD_MODEL_PATH)
@@ -298,8 +314,14 @@ def save_plot_image(fig, directory, filename):
     return file_path
 
 
-FEMUR_MODEL_PATH = "D:/Alyan/Final-Year-Project/FYP/FYP-FINAL-Server-webapp/models/VLE6_MODEL.tflite"
-FEMUR_PLOT_DIR = "static/Femur_result_plot_images"
+FEMUR_MODEL_PATH = os.path.join(BASE_DIR, "models", "VLE6_MODEL.tflite")
+
+FEMUR_PLOT_DIR = os.path.join(
+    BASE_DIR,
+    "static",
+    "Femur_result_plot_images"
+)
+
 
 # Load TFLite model
 femur_interpreter = tf.lite.Interpreter(model_path=FEMUR_MODEL_PATH)
@@ -397,17 +419,25 @@ def test_voluson_e6_tflite():
         'result_femur.html',
         machine='Voluson E6',
         femur_length=pix_mm,
-        image_path=os.path.join(FEMUR_PLOT_DIR, 'voluson_e6_plot.png'),
-        plot_path=plot_image_path
+        image_path='static/Femur_result_plot_images/voluson_e6_plot.png'
     )
-
 
 
 # --------------------------------------------------
 # Route for VOLUSON S10 Machine
 # --------------------------------------------------
-FEMUR_S10_MODEL_PATH = "D:/Alyan/Final-Year-Project/FYP/FYP-FINAL-Server-webapp/models/VLS10_MODEL.tflite"
-FEMUR_PLOT_DIR = "static/Femur_result_plot_images"
+FEMUR_S10_MODEL_PATH = os.path.join(
+    BASE_DIR,
+    "models",
+    "VLS10_MODEL.tflite"
+)
+
+FEMUR_PLOT_DIR = os.path.join(
+    BASE_DIR,
+    "static",
+    "Femur_result_plot_images"
+)
+
 
 # Load TFLite model for Voluson S10
 femur_s10_interpreter = tf.lite.Interpreter(model_path=FEMUR_S10_MODEL_PATH)
@@ -501,16 +531,25 @@ def test_voluson_s10_tflite():
         'result_femur.html',
         machine='Voluson S10',
         femur_length=pix_mm,
-        image_path=os.path.join(FEMUR_PLOT_DIR, 'voluson_s10_plot.png'),
-        plot_path=plot_image_path
+        image_path='static/Femur_result_plot_images/voluson_s10_plot.png'
     )
 
 
 # --------------------------------------------------
 # Route for VOLUSON S8 Machine
 # --------------------------------------------------
-FEMUR_S8_MODEL_PATH = "D:/Alyan/Final-Year-Project/FYP/FYP-FINAL-Server-webapp/models/VLS8_MODEL.tflite"
-FEMUR_PLOT_DIR = "static/Femur_result_plot_images"
+FEMUR_S8_MODEL_PATH = os.path.join(
+    BASE_DIR,
+    "models",
+    "VLS8_MODEL.tflite"
+)
+
+FEMUR_PLOT_DIR = os.path.join(
+    BASE_DIR,
+    "static",
+    "Femur_result_plot_images"
+)
+
 
 femur_s8_interpreter = tf.lite.Interpreter(model_path=FEMUR_S8_MODEL_PATH)
 femur_s8_interpreter.allocate_tensors()
@@ -613,19 +652,27 @@ def test_voluson_s8_tflite():
     # Render result
     return render_template(
         'result_femur.html',
-        machine='VolusonS8',
+        machine='Voluson S8',
         femur_length=pix_mm,
-        image_path=f'{FEMUR_PLOT_DIR}/voluson_s8_plot.png',
-        plot_path=plot_image_path
+        image_path='static/Femur_result_plot_images/voluson_s8_plot.png'
     )
-
 
 
 # --------------------------------------------------
 # Route for ALOKA Machine
 # --------------------------------------------------
-FEMUR_ALOKA_MODEL_PATH = "D:/Alyan/Final-Year-Project/FYP/FYP-FINAL-Server-webapp/models/ALOKA_MODEL.tflite"
-FEMUR_PLOT_DIR = "static/Femur_result_plot_images"
+FEMUR_ALOKA_MODEL_PATH = os.path.join(
+    BASE_DIR,
+    "models",
+    "ALOKA_MODEL.tflite"
+)
+
+FEMUR_PLOT_DIR = os.path.join(
+    BASE_DIR,
+    "static",
+    "Femur_result_plot_images"
+)
+
 
 aloka_interpreter = tf.lite.Interpreter(model_path=FEMUR_ALOKA_MODEL_PATH)
 aloka_interpreter.allocate_tensors()
@@ -731,8 +778,7 @@ def test_aloka_tflite():
         'result_femur.html',
         machine='ALOKA',
         femur_length=pix_mm,
-        image_path=f'{FEMUR_PLOT_DIR}/aloka_plot.png',
-        plot_path=plot_image_path
+        image_path='static/Femur_result_plot_images/aloka_plot.png'
     )
 
 
@@ -743,4 +789,5 @@ def femur_page():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    serve(app, host='0.0.0.0', port=5000)  # listen on all interfaces
+
