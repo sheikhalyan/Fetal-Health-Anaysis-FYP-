@@ -366,18 +366,7 @@ body.dark-theme .upload-zone {
     margin: 8px 0;
 }
 
-/* -------------------- Responsive -------------------- */
-@media (max-width: 768px) {
-    .grid.dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-    .card {
-        margin: 10px;
-    }
-    .femur-buttons button {
-        margin-bottom: 12px;
-    }
-}
+
 /* ================== Responsive Header Fix v2 ================== */
 
 /* Default header (desktop / tablet) */
@@ -487,8 +476,17 @@ body.no-scroll {
         box-shadow: 0 0 0 4px rgba(144, 224, 239, 0.4);
     }
 
-}
+     .grid.dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .card {
+        margin: 10px;
+    }
+    .femur-buttons button {
+        margin-bottom: 12px;
+    }
 
+}
 
 /* ---------------- Very small phones (<480px) ---------------- */
 @media (max-width: 480px) {
