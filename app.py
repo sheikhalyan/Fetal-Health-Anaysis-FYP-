@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from waitress import serve
+#from waitress import serve -- commented for railway deployment
 
 app = Flask(__name__)
 
@@ -786,6 +786,10 @@ def femur_page():
     machine = request.args.get('machine', 'default_machine_value')
     return render_template('femur.html', machine=machine)
 
+#commented for Railway Deployment
+#if __name__ == '__main__':
+#    serve(app, host='0.0.0.0', port=5000)  # listen on all interfaces
+
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=5000)  # listen on all interfaces
+    app.run()
 
