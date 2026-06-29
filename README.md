@@ -248,7 +248,7 @@ It is **not a certified medical diagnostic tool** and must not be used as a subs
 ## Author
 
 **Sheikh Alyan** — BS Computer Science, PAF-KIET (2020–2024)
-Now working as Senior Officer IT at Meezan Bank, Karachi
+
 
 [![GitHub](https://img.shields.io/badge/GitHub-@sheikhalyan-181717?style=flat-square&logo=github)](https://github.com/sheikhalyan)
 
