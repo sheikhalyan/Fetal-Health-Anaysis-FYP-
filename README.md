@@ -8,9 +8,9 @@
 [![OpenCV](https://img.shields.io/badge/OpenCV-4.x-5C3EE8?style=flat-square&logo=opencv&logoColor=white)](https://opencv.org)
 [![License](https://img.shields.io/badge/License-Academic%20%2F%20Research-lightgrey?style=flat-square)](LICENSE)
 
-> A multi-model deep learning system for the automated segmentation and biometric measurement of fetal anatomical structures from ultrasound images — built as a published Final Year Research Project at PAF-KIET.
+> > A multi-model deep learning system for the automated segmentation and biometric measurement of fetal anatomical structures from ultrasound images — built as a Final Year Research Project at PAF-KIET, with a research paper currently not published.
 
-**Published research paper:** *"Multi-Model Fetal Biometry: An Integrated Approach using V-Net Model for automated segmentation and measurement of Femur Length, Abdominal Circumference, and Biparietal Diameter with Head Circumference in Ultrasound Images"*
+**yet to be Published research paper:** *"Multi-Model Fetal Biometry: An Integrated Approach using V-Net Model for automated segmentation and measurement of Femur Length, Abdominal Circumference, and Biparietal Diameter with Head Circumference in Ultrasound Images"*
 
 ---
 
@@ -224,7 +224,7 @@ fetal-health-analysis/
 
 ## Research Paper
 
-This project is based on peer-reviewed research:
+This project is based on original research conducted as part of the Final Year Project:
 
 **"Multi-Model Fetal Biometry: An Integrated Approach using V-Net Model"**
 Sheikh Alyan, Syed Saqib, Areeb Ahmed, Abdul Samad
